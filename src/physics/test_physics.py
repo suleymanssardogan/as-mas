@@ -1,6 +1,8 @@
 from physics.tle import load_satellite_from_tle
 from physics.propagation import propagate_satellite
 from physics.residual import compute_residual
+from data.writer import save_residuals
+from datetime import datetime
 
 import numpy as np
 
@@ -15,8 +17,10 @@ ISS_TLE = (
 satellite = load_satellite_from_tle(*ISS_TLE)
 
 # --- PHYSICS PROPAGATION ---
-result = propagate_satellite(satellite)
-
+result = propagate_satellite(
+    satellite,
+    start_time=datetime.utcnow()
+)
 print("Position (first 5 timesteps):")
 print(result["position_km"][:, :5])
 
@@ -37,3 +41,10 @@ residuals = compute_residual(
 # Anomly = abnormal increase in residual magnitude
 print("\nResidual magnitude (first 5 timesteps):")
 print(residuals["residual_magnitude"][:5])
+
+output_path = save_residuals(
+    timestamps=result["times"],
+    residual_magnitude=residuals["residual_magnitude"]
+)
+
+print(f"\nResiduals saved to: {output_path}")
